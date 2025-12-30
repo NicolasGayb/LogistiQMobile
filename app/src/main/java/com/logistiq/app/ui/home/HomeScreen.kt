@@ -46,21 +46,28 @@ fun HomeScreen(
                     style = MaterialTheme.typography.bodyLarge
                 )
 
-                Spacer(modifier = Modifier.height(32.dp))
+                Spacer(modifier = Modifier.height(60.dp))
 
                 FeatureCard(
-                    title = "Gestão inteligente",
-                    description = "Centralize e acompanhe operações com eficiência."
+                    title = "Entregas",
+                    icon = "📦",
+                    description = "Acompanhe entradas e retiradas com total controle."
                 )
 
-                FeatureCard(
-                    title = "Segurança de ponta",
-                    description = "Autenticação segura e comunicação criptografada."
-                )
+                Spacer(modifier = Modifier.height(16.dp))
 
                 FeatureCard(
-                    title = "Arquitetura escalável",
-                    description = "Pronto para crescer com sua operação."
+                    title = "Usuários",
+                    icon = "👥",
+                    description = "Gerencie quem acessa o sistema com segurança."
+                )
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                FeatureCard(
+                    title = "Relatórios",
+                    icon = "📊",
+                    description = "Visualize dados importantes de forma clara."
                 )
             }
 
