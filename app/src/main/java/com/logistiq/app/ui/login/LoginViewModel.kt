@@ -11,10 +11,12 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.getValue
 import com.logistiq.app.data.auth.AuthRepository
 import com.logistiq.app.network.model.LoginRequest
+import dagger.hilt.android.lifecycle.HiltViewModel
+import javax.inject.Inject
 
-class LoginViewModel(
-    private val repository: AuthRepository =
-        AuthRepository(RetrofitInstance.api)
+@HiltViewModel
+class LoginViewModel @Inject constructor(
+    private val repository: AuthRepository
 ) : ViewModel() {
 
     var email by mutableStateOf("")

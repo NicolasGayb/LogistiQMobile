@@ -3,42 +3,67 @@ package com.logistiq.app
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.logistiq.app.ui.theme.LogistiQTheme
 import com.logistiq.app.ui.home.HomeScreen
 import com.logistiq.app.ui.login.LoginScreen
+import com.logistiq.app.ui.signup.SignupScreen
+import com.logistiq.app.ui.theme.LogistiQTheme
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        installSplashScreen()
         setContent {
-            LogistiQTheme {
+            LogistiQApp()
+        }
+    }
+}
 
-                val navController = rememberNavController()
+@Composable
+fun LogistiQApp() {
+    LogistiQTheme {
+        Surface(
+            modifier = Modifier.fillMaxSize(),
+            color = MaterialTheme.colorScheme.background
+        ) {
+            val navController = rememberNavController()
 
-                NavHost(
-                    navController = navController,
-                    startDestination = "home"
-                ){
-                    composable("home"){
-                        HomeScreen(
-                            onGoToLogin = {
-                                navController.navigate("login")
-                            }
-                        )
-                    }
-                    composable("login"){
-                        LoginScreen (
-                            onBackClick = {
-                                navController.popBackStack()
-                            }
-                        )
-                    }
+            NavHost(
+                navController = navController,
+                startDestination = "home"
+            ) {
+                composable("home") {
+                    HomeScreen(
+                        onStartClick = { navController.navigate("login") }
+                    )
                 }
-
+                composable("login") {
+                    LoginScreen(
+                        onBackClick = { navController.popBackStack() },
+                        onGoToSignup = { navController.navigate("signup") }
+                    )
+                }
+                composable("signup") {
+                    SignupScreen(
+                        onBackClick = { navController.popBackStack() },
+                        onSignupSuccess = {
+                            navController.navigate("home") {
+                                popUpTo("home") { inclusive = true }
+                            }
+                        }
+                    )
+                }
             }
         }
     }

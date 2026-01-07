@@ -17,7 +17,7 @@ import androidx.compose.foundation.layout.Box
 
 @Composable
 fun HomeScreen(
-    onGoToLogin: () -> Unit
+    onStartClick: () -> Unit
 ) {
     LogistiQScaffold {
 
@@ -73,7 +73,7 @@ fun HomeScreen(
 
             LogistiQButton(
                 text = "Começar agora",
-                onClick = onGoToLogin,
+                onClick = onStartClick,
                 modifier = Modifier
                     .align(Alignment.BottomCenter)
                     .padding(bottom = 24.dp)
