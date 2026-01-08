@@ -3,16 +3,14 @@ package com.logistiq.app.ui.login
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.logistiq.app.network.model.AuthApi
-import kotlinx.coroutines.launch
 import androidx.compose.runtime.mutableStateOf
-import com.logistiq.app.data.remote.RetrofitInstance
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.getValue
-import com.logistiq.app.data.auth.AuthRepository
-import com.logistiq.app.network.model.LoginRequest
+import com.logistiq.app.data.AuthRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.launch
 import javax.inject.Inject
+import androidx.compose.runtime.*
 
 @HiltViewModel
 class LoginViewModel @Inject constructor(
@@ -47,27 +45,41 @@ class LoginViewModel @Inject constructor(
             try {
                 Log.d("LOGIN_FLOW", "Chamando api.login()")
 
-                val request = LoginRequest(
-                    email = email,
-                    password = password
-                )
-
                 val response = repository.login(email, password)
 
                 Log.d("LOGIN_FLOW", "Response: ${response.code()}")
 
                 if (response.isSuccessful) {
-                    // Login bem-sucedido
-                    Log.d("LOGIN_FLOW", "Login bem-sucedido")
+                    val result = response.body()
+
+                    if (result == null) {
+                        Log.e("LOGIN_FLOW", "Response body veio null")
+                        errorMessage = "Erro ao processar resposta do servidor"
+                        return@launch
+                    }
+
+                    val user = result.user
+                    if (user == null) {
+                        Log.e("LOGIN_FLOW", "Usuário veio null no response")
+                        errorMessage = "Erro ao carregar dados do usuário"
+                        return@launch
+                    }
+
+                    Log.d("LOGIN_FLOW", "Usuário logado: ${result.user.name}")
+                    Log.d("LOGIN_FLOW", "Token recebido")
+
+                    repository.saveToken(result.token)
+
+                    Log.d("LOGIN_FLOW", "Token salvo com sucesso")
+
                 } else {
-                    // Login falhou
                     errorMessage = "Erro ${response.code()}: ${response.message()}"
-                    Log.d("LOGIN_FLOW", "Login falhou")
+                    Log.e("LOGIN_FLOW", "Login falhou")
                 }
-            }
-            catch (e: Exception) {
+
+            } catch (e: Exception) {
                 Log.e("LOGIN", "Erro na requisição", e)
-                errorMessage = "Erro de conexão"
+                errorMessage = "Erro ao se conectar com o servidor"
             } finally {
                 isLoading = false
             }

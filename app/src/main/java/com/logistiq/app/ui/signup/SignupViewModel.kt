@@ -11,7 +11,7 @@ import javax.inject.Inject
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
-import com.logistiq.app.data.auth.AuthRepository
+import com.logistiq.app.data.AuthRepository
 import com.google.gson.Gson
 import com.logistiq.app.network.model.SignupRequest
 import android.util.Log
