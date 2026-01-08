@@ -12,24 +12,30 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import com.logistiq.app.data.auth.AuthRepository
-import com.logistiq.app.util.formatCNPJ
+import com.google.gson.Gson
 import com.logistiq.app.network.model.SignupRequest
-import com.logistiq.app.ui.signup.SignupState
+import android.util.Log
+import com.logistiq.app.network.model.User
+import com.logistiq.app.network.model.Company
 
 @HiltViewModel
 class SignupViewModel @Inject constructor(
-    private val authApi: AuthApi,
-    private val repository: AuthRepository
+    private val authApi: AuthApi
 ) : ViewModel() {
 
     var name by mutableStateOf("")
         private set
+
     var email by mutableStateOf("")
         private set
+
     var password by mutableStateOf("")
         private set
+
     var companyName by mutableStateOf("")
         private set
+
+    // 🔒 SEMPRE armazenar apenas números
     var companyCNPJ by mutableStateOf("")
         private set
 
@@ -41,7 +47,7 @@ class SignupViewModel @Inject constructor(
                 email.isNotBlank() &&
                 password.length >= 6 &&
                 companyName.isNotBlank() &&
-                companyCNPJ.length == 18 // CNPJ formatado: 18 caracteres
+                companyCNPJ.length == 14 // 14 dígitos reais
 
     fun onNameChange(value: String) {
         name = value
@@ -60,31 +66,47 @@ class SignupViewModel @Inject constructor(
     }
 
     fun onCompanyCNPJChange(value: String) {
-        companyCNPJ = formatCNPJ(value)
+        // 🔒 garante apenas números, sem máscara
+        companyCNPJ = value.filter { it.isDigit() }
     }
 
     fun signup() {
         viewModelScope.launch {
             _signupState.value = SignupState.Loading
+
             try {
-                val response = authApi.signup(
-                    SignupRequest(
+                val request = SignupRequest(
+                    company = Company(
+                        name = companyName,
+                        document = companyCNPJ
+                    ),
+                    user = User(
                         name = name,
                         email = email,
                         password = password,
-                        companyName = companyName,
-                        companyCNPJ = companyCNPJ
                     )
                 )
 
+                // 🔍 LOG CRÍTICO PARA DEBUG
+                Log.d("SIGNUP_REQUEST", Gson().toJson(request))
+
+                val response = authApi.signup(request)
+
                 if (response.isSuccessful) {
-                    val body = response.body() ?: throw Exception("Resposta vazia do servidor")
+                    val body = response.body()
+                        ?: throw Exception("Resposta vazia do servidor")
+
                     _signupState.value = SignupState.Success(body)
                 } else {
-                    throw Exception("Erro no cadastro: ${response.code()} ${response.message()}")
+                    throw Exception(
+                        "Erro no cadastro: ${response.code()} ${response.message()}"
+                    )
                 }
+
             } catch (e: Exception) {
-                _signupState.value = SignupState.Error(e.message ?: "Erro desconhecido")
+                Log.e("SIGNUP_ERROR", "Erro ao cadastrar", e)
+                _signupState.value =
+                    SignupState.Error(e.message ?: "Erro desconhecido")
             }
         }
     }

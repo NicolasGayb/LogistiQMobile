@@ -3,12 +3,13 @@ package com.logistiq.app.data.auth
 import com.logistiq.app.network.model.AuthApi
 import com.logistiq.app.network.model.SignupRequest
 import com.logistiq.app.network.model.SignupResponse
+import com.logistiq.app.network.model.User
+import com.logistiq.app.network.model.Company
 import javax.inject.Inject
 import javax.inject.Singleton
 import com.logistiq.app.network.model.LoginRequest
 import com.logistiq.app.network.model.LoginResponse
 import retrofit2.Response
-
 
 @Singleton
 class AuthRepository @Inject constructor(
@@ -16,8 +17,7 @@ class AuthRepository @Inject constructor(
 ) {
 
     suspend fun login(email: String, password: String): Response<LoginResponse> {
-        val request = LoginRequest(email = email, password = password)
-        return api.login(request)
+        return api.login(email = email, password = password)
     }
 
     suspend fun signup(
@@ -25,17 +25,21 @@ class AuthRepository @Inject constructor(
         email: String,
         password: String,
         companyName: String,
-        companyCNPJ: String
+        companyCNPJ: String,
     ): SignupResponse {
-        val response = api.signup(
-            SignupRequest(
+        val request = SignupRequest(
+            company = Company(
+                name = companyName,
+                document = companyCNPJ
+            ),
+            user = User(
                 name = name,
                 email = email,
                 password = password,
-                companyName = companyName,
-                companyCNPJ = companyCNPJ
             )
         )
+
+        val response = api.signup(request)
 
         if (response.isSuccessful) {
             return response.body() ?: throw Exception("Resposta vazia do servidor")

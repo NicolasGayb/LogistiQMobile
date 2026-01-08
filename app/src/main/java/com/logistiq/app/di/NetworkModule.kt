@@ -13,7 +13,7 @@ import javax.inject.Singleton
 @InstallIn(SingletonComponent::class)
 object NetworkModule {
 
-    private const val BASE_URL = "https://10.0.2.2:8000/"
+    private const val BASE_URL = "https://logistiq-backend-6a876a3b123b.herokuapp.com/"
 
     @Provides
     @Singleton
